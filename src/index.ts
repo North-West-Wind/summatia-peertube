@@ -29,8 +29,10 @@ const timerManager = new TimerManager();
 import { BrellaRateTimer } from "./timers/brella-rate";
 import { BrellaTrigger } from "./triggers/brella";
 import { FunnyTrigger } from "./triggers/funny";
+import { RedeemTrigger } from "./triggers/redeem";
 triggerManager.add(new BrellaTrigger());
 triggerManager.add(new FunnyTrigger());
+triggerManager.add(new RedeemTrigger(channelPointManager));
 timerManager.add(new BrellaRateTimer(client));
 
 client.on("ready", () => {

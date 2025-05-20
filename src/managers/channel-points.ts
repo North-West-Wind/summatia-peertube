@@ -1,7 +1,7 @@
 import { JID } from "@xmpp/jid";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import * as path from "path";
-import { PeerTubeXMPPClient } from "peertube-livechat-xmpp";
+import { PeerTubeXMPPClient, User } from "peertube-livechat-xmpp";
 
 export class ChannelPointManager {
 	readonly channelPointDir: string;
@@ -26,7 +26,7 @@ export class ChannelPointManager {
 			if (existsSync(this.accountFile)) {
 				const json = JSON.parse(readFileSync(this.accountFile, "utf8"));
 				for (const [occupantId, points] of Object.entries(json))
-					this.anon.set(occupantId, points as number);
+					this.account.set(occupantId, points as number);
 			}
 		} else
 			mkdirSync(this.channelPointDir);
@@ -80,5 +80,39 @@ export class ChannelPointManager {
 	stop() {
 		if (this.timeout)
 			clearTimeout(this.timeout);
+	}
+
+	deduct(user: User, points: number, dry = false) {
+		if (this.account.has(user.occupantId)) {
+			const newPoints = this.account.get(user.occupantId)! - points;
+			if (newPoints < 0) return false;
+			if (!dry) {
+				this.account.set(user.occupantId, newPoints);
+				this.save();
+			}
+			return true;
+		}
+		if (user.jid) {
+			if (user.jid.domain == user.client.data.localAnonymousJID) {
+				if (!this.anon.has(user.nickname)) return false;
+				const newPoints = this.anon.get(user.nickname)! - points;
+				if (newPoints < 0) return false;
+				if (!dry) {
+					this.account.set(user.occupantId, newPoints);
+					this.save();
+				}
+				return true;
+			} else return false;
+		}
+		if (this.anon.has(user.nickname)) {
+			const newPoints = this.anon.get(user.nickname)! - points;
+			if (newPoints < 0) return false;
+			if (!dry) {
+				this.anon.set(user.nickname, newPoints);
+				this.save();
+			}
+			return true;
+		}
+		return false;
 	}
 }

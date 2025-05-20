@@ -46,12 +46,12 @@ export class TriggerManager {
 				await trigger.handleMessage(message);
 		}
 
-		const args = message.body.split(/s+/);
+		const args = message.body.split(/\s+/);
 		const first = args.shift()!;
 		if (first.startsWith(this.prefix)) {
 			const name = first.slice(this.prefix.length);
 			const trigger = this.triggers.get(name);
-			if (trigger?.message)
+			if (trigger?.command)
 				await trigger.handleCommand(args, message);
 		}
 	}

@@ -1,0 +1,28 @@
+{
+  "name": "summatia-peertube",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+		"start": "node dist/index.js",
+    "test": "tsx src/index.ts",
+		"build": "tsc",
+		"patch-sasl": "sed -i -e 's/console\\.log\\(.*\\);//g' node_modules/@xmpp/sasl/index.js"
+  },
+  "keywords": [],
+  "author": "NorthWestWind",
+  "license": "GPL-3.0-only",
+  "dependencies": {
+    "@xmpp/jid": "^0.13.2",
+    "dotenv": "^16.5.0",
+    "node-fetch": "^2.7.0",
+    "peertube-livechat-xmpp": "^0.0.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.48",
+    "@types/node-fetch": "^2.6.12",
+    "@types/xmpp__jid": "^1.3.5",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,20 +1,29 @@
 import { Message, PeerTubeXMPPClient, User } from "peertube-livechat-xmpp";
 
+export enum TriggerFlag {
+	MESSAGE = 1,
+	COMMAND = 2,
+	PRESENCE = 4
+}
+
 export abstract class Trigger {
 	name: string;
 	aliases: string[];
 	message: boolean;
+	command: boolean;
 	presence: boolean;
 
-	constructor(name: string, message: boolean, presence: boolean, aliases: string[] = []) {
+	constructor(name: string, flags: number, aliases: string[] = []) {
 		this.name = name;
-		this.message = message;
-		this.presence = presence;
+		this.message = !!(flags & TriggerFlag.MESSAGE);
+		this.command = !!(flags & TriggerFlag.COMMAND);
+		this.presence = !!(flags & TriggerFlag.PRESENCE);
 		this.aliases = aliases;
 	}
 
-	abstract handleMessage(args: string[], message: Message, client: PeerTubeXMPPClient): void | Promise<void>;
-	abstract handlePresence(oldUser: User | undefined, newUser: User, client: PeerTubeXMPPClient): void | Promise<void>;
+	async handleMessage(message: Message) {}
+	async handleCommand(args: string[], message: Message) {}
+	async handlePresence(oldUser: User | undefined, newUser: User) {}
 }
 
 export class TriggerManager {
@@ -31,21 +40,26 @@ export class TriggerManager {
 			trigger.aliases.forEach(alias => this.triggers.set(alias, trigger));
 	}
 
-	async handleMessage(message: Message, client: PeerTubeXMPPClient) {
+	async handleMessage(message: Message) {
+		for (const trigger of this.triggers.values()) {
+			if (trigger.message)
+				await trigger.handleMessage(message);
+		}
+
 		const args = message.body.split(/s+/);
 		const first = args.shift()!;
 		if (first.startsWith(this.prefix)) {
 			const name = first.slice(this.prefix.length);
 			const trigger = this.triggers.get(name);
 			if (trigger?.message)
-				await trigger.handleMessage(args, message, client);
+				await trigger.handleCommand(args, message);
 		}
 	}
 
-	async handlePresence(oldUser: User | undefined, newUser: User, client: PeerTubeXMPPClient) {
+	async handlePresence(oldUser: User | undefined, newUser: User) {
 		for (const trigger of this.triggers.values()) {
 			if (trigger.presence)
-				await trigger.handlePresence(oldUser, newUser, client);
+				await trigger.handlePresence(oldUser, newUser);
 		}
 	}
 }

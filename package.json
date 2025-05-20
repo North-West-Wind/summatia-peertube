@@ -16,7 +16,7 @@
     "@xmpp/jid": "^0.13.2",
     "dotenv": "^16.5.0",
     "node-fetch": "^2.7.0",
-    "peertube-livechat-xmpp": "^0.0.6"
+    "peertube-livechat-xmpp": "^0.0.8"
   },
   "devDependencies": {
     "@types/node": "^20.17.48",

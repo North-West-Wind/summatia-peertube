@@ -1,16 +1,16 @@
 import { Message, PeerTubeXMPPClient } from "peertube-livechat-xmpp";
 import { roundTo } from "../helpers/math";
-import { Trigger } from "../managers/trigger";
+import { Trigger, TriggerFlag } from "../managers/trigger";
 import sharedData from "../shared";
 
 export class BrellaTrigger extends Trigger {
 	constructor() {
-		super("brella", true, false);
+		super("brella", TriggerFlag.COMMAND, ["brella"]);
 	}
 
-	async handleMessage(_args: string[], _message: Message, client: PeerTubeXMPPClient) {
+	async handleCommand(_args: string[], message: Message) {
 		if (!sharedData.brellaAnalytics || !sharedData.brellaToday) {
-			await client.message("no brella data yet");
+			await message.reply("no brella data yet");
 			return;
 		}
 		const analytics = sharedData.brellaAnalytics;
@@ -23,9 +23,6 @@ export class BrellaTrigger extends Trigger {
 		body += `- [${specifics.spygadget}, ${specifics.spygadget_sorella}, ${specifics.parashelter}, ${specifics.parashelter_sorella}, ${specifics.order_shelter_replica}, ${specifics.campingshelter}, ${specifics.campingshelter_sorella}, ${specifics.brella24mk1}, ${specifics.brella24mk2}]\n`;
 		body += "(order: v/s under, v/s/order brella, v/s tent, recycled I/II)\n";
 		body += "https://brella.northwestw.in";
-		await client.message(body);
+		await message.reply(body);
 	}
-
-	// No presence effect
-	handlePresence() { }
 }

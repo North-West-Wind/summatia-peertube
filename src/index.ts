@@ -28,7 +28,9 @@ const timerManager = new TimerManager();
 // Import modules here to prevent circular imports
 import { BrellaRateTimer } from "./timers/brella-rate";
 import { BrellaTrigger } from "./triggers/brella";
+import { FunnyTrigger } from "./triggers/funny";
 triggerManager.add(new BrellaTrigger());
+triggerManager.add(new FunnyTrigger());
 timerManager.add(new BrellaRateTimer(client));
 
 client.on("ready", () => {
@@ -41,12 +43,12 @@ client.on("message", async message => {
 	// Ignore self
 	if (message.authorId == client.users.self?.occupantId) return;
 	// Handle triggers
-	await triggerManager.handleMessage(message, client);
+	await triggerManager.handleMessage(message);
 });
 
 client.on("presence", async (oldUser, newUser) => {
 	// Ignore self
 	if (newUser.occupantId == client.users.self?.occupantId) return;
 	// Handle triggers
-	await triggerManager.handlePresence(oldUser, newUser, client);
+	await triggerManager.handlePresence(oldUser, newUser);
 });
